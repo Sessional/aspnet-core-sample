@@ -478,3 +478,8 @@ $RECYCLE.BIN/
 
 .idea
 .envrc
+
+Api/Properties/launchSettings.json
+Api/appsettings.Development.json
+
+Iac/terraform.tfstate
