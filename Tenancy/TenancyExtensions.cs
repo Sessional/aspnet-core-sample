@@ -21,8 +21,8 @@ public static class TenancyExtensions
     {
         builder.Use(async (context, func) =>
         {
-            var configuration = context.RequestServices.GetService<IOptions<TenantIdResolverConfiguration>>();
-
+            var configuration = context.RequestServices.GetService<IOptions<TenantIdResolverConfiguration>>()
+                                ?? throw new Exception("Unable to resolve tenant configuration.");
             if (context.Request.Headers.TryGetValue(configuration.Value.TenantIdHeader, out var tenantId))
                 context.Items.Add(configuration.Value.TenantIdKey, tenantId.First());
             await func(context);

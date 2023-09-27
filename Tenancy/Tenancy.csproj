@@ -10,9 +10,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
-    
+
     <ItemGroup>
         <Reference Include="Microsoft.AspNetCore">
             <HintPath>..\..\..\..\..\..\usr\local\share\dotnet\shared\Microsoft.AspNetCore.App\7.0.0\Microsoft.AspNetCore.dll</HintPath>
@@ -20,7 +20,6 @@
         <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
             <HintPath>..\..\..\..\..\..\usr\local\share\dotnet\shared\Microsoft.AspNetCore.App\7.0.0\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
         </Reference>
-        <Reference Include="Microsoft.AspNetCore.Http.Features"/>
         <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
     </ItemGroup>
 

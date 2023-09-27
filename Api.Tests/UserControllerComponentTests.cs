@@ -50,7 +50,7 @@ public class UserControllerComponentTests :
 
     private class ErrorResponseBody
     {
-        public string message { get; set; }
+        public string message { get; set; } = string.Empty;
     }
 
     [Fact]
