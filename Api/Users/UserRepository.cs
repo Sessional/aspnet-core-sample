@@ -14,6 +14,18 @@ public class UserRepository
         _databaseContext = context;
     }
 
+    public async Task CreateUser(UserEntity user)
+    {
+        using var connection = _databaseContext.GetConnection("Primary");
+        await connection.ExecuteAsync("""
+                                      INSERT INTO users (id, auth0_id) VALUES (@userId,@auth0Id)
+                                      """, new
+        {
+            userId = user.Id,
+            auth0Id = user.Auth0Id
+        });
+    }
+
     public async Task<UserEntity?> GetUserOrNull(long id)
     {
         using var connection = _databaseContext.GetConnection("Primary");
