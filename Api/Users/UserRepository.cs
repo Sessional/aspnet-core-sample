@@ -18,7 +18,7 @@ public class UserRepository
     {
         using var connection = _databaseContext.GetConnection("Primary");
         await connection.ExecuteAsync("""
-                                      INSERT INTO users (id, auth0_id) VALUES (@userId,@auth0Id)
+                                      INSERT INTO public.users (id, auth0_id) VALUES (@userId,@auth0Id)
                                       """, new
         {
             userId = user.Id,

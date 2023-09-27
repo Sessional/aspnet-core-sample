@@ -1,0 +1,75 @@
+name: Pull Request
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+      - uses: actions/setup-dotnet@v3
+        name: Setup dotnet
+        with:
+          dotnet-version: '7.0.x'
+      - run: dotnet restore
+        name: Restore project
+      - run: dotnet build
+        name: Build project
+      - id: test
+        name: Test project
+        run: |
+          set -euo pipefail
+          IFS=$'\n\t'
+  
+          echo 'output<<EOF' >> $GITHUB_OUTPUT
+          dotnet test --no-restore --no-build -v minimal | tee -a $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Comment test output
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          IFS=$'\n\t'
+          
+          OUTPUT_HEADER="## Test Output"
+          COMMENT_ID=$(gh pr view -c ${{ github.event.number }} --json comments --jq ".comments[] | select(.body | test(\"$OUTPUT_HEADER\")) | .id")
+          if [ -z "$COMMENT_ID" ]
+          then
+            cat << EndOfMessage | gh pr comment ${{ github.event.number }} --body-file -
+            <details>
+            <summary>
+          
+            $OUTPUT_HEADER
+          
+            </summary>
+          
+            \`\`\`
+            ${{ steps.test.outputs.output}}
+            \`\`\`
+            </details>
+          EndOfMessage
+          else
+            cat << EndOfMessage | gh pr comment ${{ github.event.number }} --edit-last --body-file -
+            <details>
+            <summary>
+          
+            $OUTPUT_HEADER
+          
+            </summary>
+  
+            \`\`\`
+            ${{ steps.test.outputs.output}}
+            \`\`\`
+            </details>
+          EndOfMessage
+          fi
+          
