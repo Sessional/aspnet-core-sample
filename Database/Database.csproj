@@ -7,11 +7,9 @@
         <OutputType>Library</OutputType>
         <AssemblyName>LonelyVale.Database</AssemblyName>
         <RootNamespace>LonelyVale.Database</RootNamespace>
+        <PreserveCompilationReferences>true</PreserveCompilationReferences>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Remove="Properties\launchSettings.json"/>
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Dapper" Version="2.0.151"/>
