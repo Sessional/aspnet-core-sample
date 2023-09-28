@@ -28,7 +28,8 @@ public class DatabaseFixture : IDisposable
             var database = parts.First(x => x.StartsWith("Database")).Split("=")[1];
             var username = parts.First(x => x.StartsWith("Username")).Split("=")[1];
             var password = parts.First(x => x.StartsWith("Password")).Split("=")[1];
-            return $"postgres://{username}:{password}@host.docker.internal:{port}/{database}?sslmode=disable";
+            var host = "true".Equals(Environment.GetEnvironmentVariable("CI")) ? "172.17.0.1" : "host.docker.internal";
+            return $"postgres://{username}:{password}@{host}:{port}/{database}?sslmode=disable";
         }
     }
 
@@ -62,6 +63,7 @@ public class DatabaseFixture : IDisposable
         {
             await AtlasContainer.StartAsync();
             await AtlasContainer.GetExitCodeAsync();
+            await AtlasContainer.GetLogsAsync();
         }));
     }
 

@@ -1,6 +1,5 @@
 using LonelyVale.OAuth.Caching;
 using LonelyVale.OAuth.Configuration;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
