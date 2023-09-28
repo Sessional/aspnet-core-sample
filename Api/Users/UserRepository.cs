@@ -18,7 +18,7 @@ public class UserRepository
     {
         using var connection = _databaseContext.GetConnection("Primary");
         var userId = await connection.QueryAsync<long>("""
-                                                       INSERT INTO public.users (auth0_id) VALUES ('@auth0Id') RETURNING id
+                                                       INSERT INTO public.users (auth0_id) VALUES (@auth0Id) RETURNING id
                                                        """, new
         {
             auth0Id = user.Auth0Id
