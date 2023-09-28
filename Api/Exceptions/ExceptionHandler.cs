@@ -26,17 +26,29 @@ public class ExceptionHandler
             var exceptionHandlerPathFeature =
                 context.Features.Get<IExceptionHandlerPathFeature>();
 
-            switch (exceptionHandlerPathFeature.Error)
+            switch (exceptionHandlerPathFeature?.Error)
             {
                 case IHandledException e:
                     return e.HandleException(context, Logger, JsonOptions);
                 default:
-                    Logger.LogError(exceptionHandlerPathFeature.Error,
-                        $"An unhandled error occurred. {exceptionHandlerPathFeature.Error.Message}");
+                    var message = "Unable to find an error to log.";
+                    switch (exceptionHandlerPathFeature)
+                    {
+                        case null:
+                            Logger.LogError(message);
+                            break;
+                        default:
+                            message = exceptionHandlerPathFeature.Error.Message;
+                            Logger.LogError(exceptionHandlerPathFeature.Error,
+                                $"An unhandled error occurred. {message}");
+                            break;
+                    }
+
+
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                     context.Response.ContentType = MediaTypeNames.Application.Json;
                     var json = JsonSerializer.Serialize(
-                        new { exceptionHandlerPathFeature.Error.Message },
+                        new { message },
                         JsonOptions?.Value.SerializerOptions);
                     return context.Response.WriteAsync(json);
             }

@@ -37,7 +37,7 @@ public class RealmController : ControllerBase
     [HttpGet("realms", Name = "GetRealms")]
     public async Task<IEnumerable<GetRealmResponse>> Get([FromQuery] GetRealmsRequest request)
     {
-        var user = await _userResolver.ResolveUserForRequest(request.userId, request.auth0UserId);
+        var user = await _userResolver.ResolveUserForRequest(request.UserId, request.Auth0UserId);
         var realms = await _repository.GetRealmsForUser(user);
         return realms.Select(realm => new GetRealmResponse()
         {
