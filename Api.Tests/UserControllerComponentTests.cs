@@ -63,6 +63,7 @@ public class UserControllerComponentTests :
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ErrorResponseBody>();
+        Assert.NotNull(body);
         Assert.Equal("Unable to determine a user to get. Please supply either a userId or an auth0UserId",
             body.message
         );
@@ -74,8 +75,8 @@ public class UserControllerComponentTests :
         // https://stebet.net/mocking-jwt-tokens-in-asp-net-core-integration-tests/
         var client = _factory.CreateClient();
 
-        var database = _factory.Services.GetService<DatabaseContext>();
         var repository = _factory.Services.GetService<UserRepository>();
+        Assert.NotNull(repository);
         await repository.CreateUser(new UserEntity()
         {
             Id = 1,
@@ -85,6 +86,7 @@ public class UserControllerComponentTests :
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<GetUserResponse>();
+        Assert.NotNull(body);
         Assert.Equal(1, body.Id);
     }
 }

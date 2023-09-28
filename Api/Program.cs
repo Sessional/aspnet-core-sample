@@ -24,7 +24,7 @@ public class Program
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(o => o.DescribeAllParametersInCamelCase());
 
         builder.Services.AddAuth0();
         builder.Services.AddDatabaseContext();

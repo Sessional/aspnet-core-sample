@@ -5,8 +5,8 @@ namespace LonelyVale.Api.Realms;
 public class GetRealmResponse
 {
     public long Id { get; set; }
-    public string Name { get; set; }
-    public string Auth0OrgId { get; set; }
+    public required string Name { get; set; }
+    public required string Auth0OrgId { get; set; }
 }
 
 public class GetRealmRequest
@@ -16,9 +16,9 @@ public class GetRealmRequest
 
 public class GetRealmsRequest
 {
-    public string? auth0UserId { get; set; }
-    public long? userId { get; set; }
+    public string? Auth0UserId { get; set; }
+    public long? UserId { get; set; }
 
-    public long offset { get; set; }
-    public long size { get; set; }
+    public long Offset { get; set; }
+    public long Size { get; set; }
 }

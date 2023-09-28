@@ -48,18 +48,18 @@ public class UserController : ControllerBase
     {
         var caller = _httpContextAccessor.HttpContext?.User!;
         var callerAuth0UserId = caller.FindFirstValue("sub");
-        var auth0UserIdToGet = request.auth0Id ?? callerAuth0UserId;
+        var auth0UserIdToGet = request.Auth0Id ?? callerAuth0UserId;
 
-        if (!request.id.HasValue && auth0UserIdToGet.IsNullOrEmpty())
+        if (!request.Id.HasValue && auth0UserIdToGet.IsNullOrEmpty())
             throw new CodedHttpException(
                 "Unable to determine a user to get. Please supply either a userId or an auth0UserId",
                 HttpStatusCode.BadRequest
             );
 
         using var connection = _databaseContext.GetConnection("Primary");
-        if (request.id.HasValue)
+        if (request.Id.HasValue)
         {
-            var user = await _repository.GetUser(request.id.Value);
+            var user = await _repository.GetUser(request.Id.Value);
             return new GetUserResponse
             {
                 Id = user.Id,

@@ -36,7 +36,7 @@ public class Auth0Controller
 
     [HttpGet("/tenant-info", Name = "Get Tenant Into")]
     [AllowAnonymous]
-    public async Task<string> WhoAmI()
+    public string GetTenantInfo()
     {
         return TenantIdResolver.GetTenantId();
     }
