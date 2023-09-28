@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           IFS=$'\n\t'
-          dotnet publish Api --self-contained -c release --use-current-runtime -o ./output
+          dotnet publish Api -c release -o output
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
