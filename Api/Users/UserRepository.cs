@@ -14,16 +14,16 @@ public class UserRepository
         _databaseContext = context;
     }
 
-    public async Task CreateUser(UserEntity user)
+    public async Task<long> CreateUser(UserEntity user)
     {
         using var connection = _databaseContext.GetConnection("Primary");
-        await connection.ExecuteAsync("""
-                                      INSERT INTO public.users (id, auth0_id) VALUES (@userId,@auth0Id)
-                                      """, new
+        var userId = await connection.QueryAsync<long>("""
+                                                       INSERT INTO public.users (auth0_id) VALUES (@auth0Id) RETURNING id
+                                                       """, new
         {
-            userId = user.Id,
             auth0Id = user.Auth0Id
         });
+        return userId.Single();
     }
 
     public async Task<UserEntity?> GetUserOrNull(long id)

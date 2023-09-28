@@ -77,16 +77,15 @@ public class UserControllerComponentTests :
 
         var repository = _factory.Services.GetService<UserRepository>();
         Assert.NotNull(repository);
-        await repository.CreateUser(new UserEntity()
+        var userId = await repository.CreateUser(new UserEntity()
         {
-            Id = 1,
             Auth0Id = "auth0|1234"
         });
-        var response = await client.GetAsync("/users?id=1");
+        var response = await client.GetAsync($"/users?id={userId}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<GetUserResponse>();
         Assert.NotNull(body);
-        Assert.Equal(1, body.Id);
+        Assert.Equal(userId, body.Id);
     }
 }
