@@ -483,3 +483,5 @@ Api/Properties/launchSettings.json
 Api/appsettings.Development.json
 
 Iac/terraform.tfstate
+
+output
