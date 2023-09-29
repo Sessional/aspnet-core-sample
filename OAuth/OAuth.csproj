@@ -6,8 +6,6 @@
         <Nullable>enable</Nullable>
         <AssemblyName>LonelyVale.OAuth</AssemblyName>
         <RootNamespace>LonelyVale.OAuth</RootNamespace>
-        <PreserveCompilationReferences>true</PreserveCompilationReferences>
-        <PreserveCompilationContext>true</PreserveCompilationContext>
         <OutputType>Library</OutputType>
     </PropertyGroup>
 
