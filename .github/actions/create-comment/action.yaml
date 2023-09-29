@@ -1,0 +1,50 @@
+name: Create comment
+description: Creates a comment on a PR
+inputs:
+  comment-header:
+    description: The header of the comment that will be placed on top of the spoiler tag
+    required: true
+  comment-contents:
+    description: The content of the comment that will be placed inside the spoiler tag
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - shell: bash
+    run: |
+      set -euo pipefail
+      IFS=$'\n\t'
+
+      OUTPUT_HEADER="## ${{ inputs.comment-header }}"
+      COMMENT_ID=$(gh pr view -c ${{ github.event.number }} --json comments --jq ".comments[] | select(.body | test(\"$OUTPUT_HEADER\")) | .id")
+      if [ -z "$COMMENT_ID" ]
+      then
+        cat << EndOfMessage | gh pr comment ${{ github.event.number }} --body-file -
+        <details>
+        <summary>
+
+        $OUTPUT_HEADER
+
+        </summary>
+
+        \`\`\`
+        ${{ inputs.comment-contents }}
+        \`\`\`
+        </details>
+      EndOfMessage
+      else
+        cat << EndOfMessage | gh pr comment ${{ github.event.number }} --edit-last --body-file -
+        <details>
+        <summary>
+
+        $OUTPUT_HEADER
+
+        </summary>
+
+        \`\`\`
+        ${{ inputs.comment-contents }}
+        \`\`\`
+        </details>
+      EndOfMessage
+      fi
