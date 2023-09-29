@@ -24,15 +24,11 @@ jobs:
         name: Restore project
       - run: dotnet build
         name: Build project
-      - id: test
-        name: Test project
-        run: |
-          set -euo pipefail
-          IFS=$'\n\t'
-  
-          echo 'output<<EOF' >> $GITHUB_OUTPUT
-          dotnet test --no-restore --no-build -v minimal | tee -a $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Test project
+        id: test
+        uses: ./.github/actions/script-to-output
+        with:
+          run: dotnet test --no-restore --no-build -v minimal
       - name: Comment test output
         env:
           GH_TOKEN: ${{ github.token }}

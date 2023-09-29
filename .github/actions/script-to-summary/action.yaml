@@ -1,0 +1,37 @@
+name: Script to Summary
+description: Sends the outputs of a script to the summary
+inputs:
+  summary-header:
+    description: the header to place on the summary spoiler
+  run:
+    description: The script to run to feed to the summary
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - shell: bash
+    run: |
+      set -euo pipefail
+      IFS=$'\n\t'
+      
+      cat <<EOF >> $GITHUB_STEP_SUMMARY
+      <details>
+      <summary>
+      
+      ## ${{ inputs.summary-header }}
+
+      </summary>
+
+      \`\`\`
+      EOF
+      
+      ${{ inputs.run }} | tee -a $GITHUB_STEP_SUMMARY
+      
+      cat <<EOF >> $GITHUB_STEP_SUMMARY
+      \`\`\`
+      </details>
+      EOF
+      
+      
+  
