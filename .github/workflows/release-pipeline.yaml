@@ -32,13 +32,11 @@ jobs:
         name: Restore project
       - run: dotnet build
         name: Build project
-      - id: test
-        name: Test project
-        run: |
-          set -euo pipefail
-          IFS=$'\n\t'
-          
-          dotnet test --no-restore --no-build -v minimal | tee -a $GITHUB_STEP_SUMMARY
+      - name: Test project
+        uses: ./.github/actions/script-to-summary
+        with:
+          summary-header: Test Output
+          run: dotnet test --no-restore --no-build -v minimal
       - name: Build container
         run: |
           set -euo pipefail

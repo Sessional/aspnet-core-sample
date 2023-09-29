@@ -1,0 +1,24 @@
+name: Script to Summary
+description: Sends the outputs of a script to the summary
+inputs:
+  run:
+    description: The script to run to feed to the summary
+    required: true
+outputs:
+  output:
+    description: the output from the command that was executed
+    value: ${{ steps.execute.outputs.output }}
+
+runs:
+  using: "composite"
+  steps:
+  - shell: bash
+    id: execute
+    run: |
+      set -euo pipefail
+      IFS=$'\n\t'
+      
+      echo 'output<<EOF' >> $GITHUB_OUTPUT
+      ${{ inputs.run }} | tee -a $GITHUB_OUTPUT
+      echo 'EOF' >> $GITHUB_OUTPUT
+  
