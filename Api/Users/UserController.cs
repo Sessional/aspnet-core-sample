@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Dapper;
 using LonelyVale.Api.Exceptions;
 using LonelyVale.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -25,6 +26,7 @@ public class UserController : ControllerBase
         _repository = repository;
     }
 
+    [Authorize]
     [HttpGet("users/{userId}", Name = "GetUserById")]
     public async Task<GetUserResponse> GetUserById(long userId)
     {
