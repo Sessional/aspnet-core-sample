@@ -52,8 +52,7 @@ public class UserControllerComponentTests :
             body.message
         );
     }
-
-
+    
     [Fact]
     public async Task GetUsersWithoutTokenFails()
     {

@@ -30,19 +30,13 @@ public class UserController : ControllerBase
     [HttpGet("users/{userId}", Name = "GetUserById")]
     public async Task<GetUserResponse> GetUserById(long userId)
     {
-        using (var connection = _databaseContext.GetConnection("Primary"))
-        {
-            var user = await connection.QueryAsync<UserEntity>(
-                "SELECT id as Id, auth0_id as Auth0Id from public.users WHERE id=@userId", new
-                {
-                    userId = userId
-                });
-            return new GetUserResponse()
-            {
-                Id = user.Single().Id,
-                Auth0Id = user.Single().Auth0Id
-            };
-        }
+        var user = await _repository.GetUserOrNull(userId) ??
+                   throw new CodedHttpException("Unable to find a user with that id.");
+
+        return new GetUserResponse(
+            user.Id ?? throw new CodedHttpException("Error finding a user with that ID."),
+            user.Auth0Id
+        );
     }
 
     [HttpGet("users", Name = "GetUser")]
@@ -62,24 +56,34 @@ public class UserController : ControllerBase
         if (request.Id.HasValue)
         {
             var user = await _repository.GetUser(request.Id.Value);
-            return new GetUserResponse
-            {
-                Id = user.Id,
-                Auth0Id = user.Auth0Id
-            };
+            return new GetUserResponse(
+                user.Id ?? throw new CodedHttpException("Unable to find a user with an id for some reason."),
+                user.Auth0Id
+            );
         }
 
 
         if (!auth0UserIdToGet.IsNullOrEmpty())
         {
             var user = await _repository.GetUserByAuth0Id(auth0UserIdToGet!);
-            return new GetUserResponse
-            {
-                Id = user.Id,
-                Auth0Id = user.Auth0Id
-            };
+            return new GetUserResponse(
+                user.Id ?? throw new CodedHttpException("Unable to find a user with an ID for some reason."),
+                user.Auth0Id
+            );
         }
 
         throw new CodedHttpException("Unable to resolve a user to retrieve.", HttpStatusCode.BadRequest);
+    }
+
+    [HttpPost("users", Name = "CreateUser")]
+    [AllowAnonymous]
+    public async Task<CreateUserResponse> CreateUser(CreateUserRequest request)
+    {
+        var userId = await _repository.CreateUser(new UserEntity(null, request.Auth0Id));
+
+        return new CreateUserResponse(
+            userId,
+            request.Auth0Id
+        );
     }
 }
