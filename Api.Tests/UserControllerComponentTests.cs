@@ -1,5 +1,7 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.Claims;
 using Dapper;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
@@ -7,8 +9,10 @@ using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Networks;
 using LonelyVale.Api.Users;
 using LonelyVale.Database;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -22,30 +26,7 @@ public class UserControllerComponentTests :
 
     public UserControllerComponentTests(WebApplicationFactory<Program> factory, DatabaseFixture databaseFixture)
     {
-        _factory = factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureLogging(o =>
-                    {
-                        o.AddFilter("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LogLevel.None);
-                        o.AddFilter("LonelyVale.Api.Exceptions.ExceptionHandler", LogLevel.None);
-                        o.AddFilter("Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware", LogLevel.None);
-                        o.AddFilter("TestContainers", LogLevel.None);
-                    }
-                );
-                builder.ConfigureTestServices(services =>
-                {
-                    services.Configure<DatabaseConfiguration>(opts =>
-                        opts.ConnectionStrings = new Dictionary<string, string>()
-                        {
-                            {
-                                "Primary",
-                                databaseFixture.PostgresContainer.GetConnectionString()
-                            }
-                        }
-                    );
-                });
-            }
-        );
+        _factory = factory.ConfigureStandardTest(databaseFixture);
     }
 
     private class ErrorResponseBody
@@ -56,10 +37,13 @@ public class UserControllerComponentTests :
     [Fact]
     public async Task GetUsersWithoutUserIdFailsBadRequest()
     {
-        // https://stebet.net/mocking-jwt-tokens-in-asp-net-core-integration-tests/
         var client = _factory.CreateClient();
-
-        var response = await client.GetAsync("/users");
+        using var requestMessage =
+            new HttpRequestMessage(HttpMethod.Get, $"/users");
+        requestMessage.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer",
+                MockJwtTokens.GenerateJwtToken(new List<Claim>()));
+        var response = await client.SendAsync(requestMessage);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ErrorResponseBody>();
@@ -69,23 +53,42 @@ public class UserControllerComponentTests :
         );
     }
 
+
     [Fact]
-    public async Task GetUsersWithUserIdFailsBadRequest()
+    public async Task GetUsersWithoutTokenFails()
     {
-        // https://stebet.net/mocking-jwt-tokens-in-asp-net-core-integration-tests/
         var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/users");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetUsersWithUserIdSucceeds()
+    {
+        var client = _factory.CreateClient();
+        var auth0UserId = "auth0|this-is-an-absurd-name";
 
         var repository = _factory.Services.GetService<UserRepository>();
         Assert.NotNull(repository);
-        var userId = await repository.CreateUser(new UserEntity()
+        var user = EntityGenerator.CreateUser() with
         {
-            Auth0Id = "auth0|1234"
-        });
-        var response = await client.GetAsync($"/users?id={userId}");
+            Auth0Id = auth0UserId
+        };
+        var userId = await repository.CreateUser(user);
+
+        using var requestMessage =
+            new HttpRequestMessage(HttpMethod.Get, $"/users?id={userId}");
+        requestMessage.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer",
+                MockJwtTokens.GenerateJwtToken(new List<Claim>()));
+        var response = await client.SendAsync(requestMessage);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<GetUserResponse>();
         Assert.NotNull(body);
         Assert.Equal(userId, body.Id);
+        Assert.Equal(auth0UserId, body.Auth0Id);
     }
 }

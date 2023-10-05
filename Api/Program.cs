@@ -6,6 +6,8 @@ using LonelyVale.Api.Realms;
 using LonelyVale.Api.Users;
 using LonelyVale.Database;
 using LonelyVale.Tenancy;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 
@@ -33,15 +35,22 @@ public class Program
         builder.Services.AddUsers();
         builder.Services.AddRealms();
 
-        builder.Services.AddAuthentication("DefaultAuth0Tenant")
-            .AddJwtBearer("DefaultAuth0Tenant", options =>
+        builder.Services.AddAuthentication("DefaultAuth0Issuer")
+            .AddJwtBearer("DefaultAuth0Issuer", options =>
             {
                 options.Authority = "https://lonelyvale.us.auth0.com/";
                 options.Audience = "http://lonelyvale.com";
                 options.MapInboundClaims = false;
             });
 
-        builder.Services.AddAuthorization(options => { options.AddRealmAuthorization(); });
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("RequireAuthentication", policyBuilder =>
+                policyBuilder.RequireAuthenticatedUser()
+                    .Build());
+            options.DefaultPolicy = options.GetPolicy("RequireAuthentication")!;
+            options.AddRealmAuthorization();
+        });
 
         var app = builder.Build();
 
@@ -64,7 +73,7 @@ public class Program
 
         app.UseHeaderBasedTenancy();
 
-        app.MapControllers();
+        app.MapControllers().RequireAuthorization();
 
         app.Run();
     }
