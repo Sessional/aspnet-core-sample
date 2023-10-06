@@ -38,7 +38,7 @@ public class RealmControllerComponentTests :
         using var requestMessage =
             new HttpRequestMessage(HttpMethod.Get, $"/realms");
         var sub = new Claim("sub", userAuth0Id);
-        var claim = new Claim("scope", "realms:GetRealms");
+        var claim = new Claim("scope", RealmScopes.ListRealms);
 
         var repository = _factory.Services.GetService<UserRepository>();
         Assert.NotNull(repository);
@@ -48,6 +48,9 @@ public class RealmControllerComponentTests :
         };
         var userId = await repository.CreateUser(user);
 
+        var realmRepository = _factory.Services.GetService<RealmRepository>();
+        Assert.NotNull(realmRepository);
+        var realmId = await realmRepository.CreateRealm(EntityGenerator.CreateRealm());
 
         requestMessage.Headers.Authorization =
             new AuthenticationHeaderValue("Bearer",
@@ -55,9 +58,11 @@ public class RealmControllerComponentTests :
         var response = await client.SendAsync(requestMessage);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var body = await response.Content.ReadFromJsonAsync<IEnumerable<GetRealmResponse>>();
+        var body = await response.Content.ReadFromJsonAsync<ListRealmsResponse>();
         Assert.NotNull(body);
-        Assert.Equal(0, body.Count());
+        Assert.Equal(1, body.Realms.Count());
+        var realm = body.Realms.Single();
+        Assert.Equal(realmId, realm.Id);
     }
 
     [Fact]
