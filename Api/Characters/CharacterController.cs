@@ -32,11 +32,10 @@ public class CharacterController : ControllerBase
                 {
                     characterId = characterId
                 });
-            return new GetCharacterContract()
-            {
-                Id = character.Single().Id,
-                UserId = character.Single().UserId
-            };
+            return new GetCharacterContract(
+                character.Single().Id,
+                character.Single().UserId
+            );
         }
     }
 }

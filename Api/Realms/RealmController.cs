@@ -1,3 +1,4 @@
+using LonelyVale.Api.Exceptions;
 using LonelyVale.Api.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,16 +22,15 @@ public class RealmController : ControllerBase
     }
 
     [Authorize("DescribeRealm")]
-    [HttpGet("realms/{Id}", Name = "GetRealm")]
-    public async Task<GetRealmResponse> Get([FromQuery] GetRealmRequest request)
+    [HttpGet("realms/{id}", Name = "GetRealm")]
+    public async Task<GetRealmResponse> Get([FromRoute] GetRealmRequest request)
     {
         var realm = await _repository.GetRealm(request.Id);
-        return new GetRealmResponse()
-        {
-            Id = realm.Id,
-            Name = realm.Name,
-            Auth0OrgId = realm.Auth0OrgId
-        };
+        return new GetRealmResponse(
+            realm.Id ?? throw new CodedHttpException("Unable to find a realm that has that id."),
+            realm.Name,
+            realm.Auth0OrgId
+        );
     }
 
     [Authorize("GetRealms")]
@@ -39,11 +39,10 @@ public class RealmController : ControllerBase
     {
         var user = await _userResolver.ResolveUserForRequest(request.UserId, request.Auth0UserId);
         var realms = await _repository.GetRealmsForUser(user);
-        return realms.Select(realm => new GetRealmResponse()
-        {
-            Id = realm.Id,
-            Name = realm.Name,
-            Auth0OrgId = realm.Auth0OrgId
-        }).ToList();
+        return realms.Select(realm => new GetRealmResponse(
+            realm.Id ?? throw new CodedHttpException("A realm in that list is broken and doesn't have an id."),
+            realm.Name,
+            realm.Auth0OrgId
+        )).ToList();
     }
 }
