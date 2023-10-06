@@ -1,24 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LonelyVale.Api.Realms;
 
-public class GetRealmResponse
-{
-    public long Id { get; set; }
-    public required string Name { get; set; }
-    public required string Auth0OrgId { get; set; }
-}
+public record GetRealmResponse(long Id, string Name, string Auth0OrgId);
 
-public class GetRealmRequest
-{
-    [Required] public long Id { get; set; }
-}
+public record GetRealmRequest(
+    [Required] [FromRoute] long Id
+);
 
-public class GetRealmsRequest
-{
-    public string? Auth0UserId { get; set; }
-    public long? UserId { get; set; }
-
-    public long Offset { get; set; }
-    public long Size { get; set; }
-}
+public record GetRealmsRequest(string? Auth0UserId, long? UserId, long Offset = 0, long Size = 10);

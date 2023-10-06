@@ -76,7 +76,6 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("users", Name = "CreateUser")]
-    [AllowAnonymous]
     public async Task<CreateUserResponse> CreateUser(CreateUserRequest request)
     {
         var userId = await _repository.CreateUser(new UserEntity(null, request.Auth0Id));

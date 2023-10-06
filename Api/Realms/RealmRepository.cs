@@ -19,7 +19,14 @@ public class RealmRepository
     {
         using var connection = _databaseContext.GetConnection("Primary");
         var realm = await connection.QueryAsync<RealmEntity>(
-            "SELECT id as Id, realm_name as Name, auth0_org_id as Auth0OrgId from public.realms WHERE id=@realmId", new
+            """
+            SELECT id as Id,
+                   realm_name as Name,
+                   auth0_org_id as Auth0OrgId,
+                   is_public as IsPublic
+            from public.realms
+            WHERE id=@realmId
+            """, new
             {
                 realmId = id
             });
@@ -27,11 +34,18 @@ public class RealmRepository
         return realm.SingleOrDefault();
     }
 
-    public async Task<RealmEntity?> GetRealmOrNullByAuth0OrgId(string orgId)
+    public async Task<RealmEntity?> GetRealmByAuth0OrgIdOrNull(string orgId)
     {
         using var connection = _databaseContext.GetConnection("Primary");
         var realm = await connection.QueryAsync<RealmEntity>(
-            "SELECT id as Id, realm_name as Name, auth0_org_id as Auth0OrgId from public.realms WHERE auth0_org_id=@orgId",
+            """
+            SELECT id as Id,
+                realm_name as Name,
+                auth0_org_id as Auth0OrgId,
+                is_public as IsPublic
+            from public.realms
+            WHERE auth0_org_id=@orgId
+            """,
             new
             {
                 orgId = orgId
@@ -42,7 +56,7 @@ public class RealmRepository
 
     public async Task<RealmEntity> GetRealmByAuth0OrgId(string orgId)
     {
-        return await GetRealmOrNullByAuth0OrgId(orgId) ??
+        return await GetRealmByAuth0OrgIdOrNull(orgId) ??
                throw new CodedHttpException("Unable to realm user with that id.", HttpStatusCode.NotFound);
     }
 
@@ -71,7 +85,6 @@ public class RealmRepository
             {
                 userId = user.Id
             });
-
 
         return realms;
     }
