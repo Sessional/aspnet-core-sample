@@ -15,6 +15,23 @@ public class RealmRepository
         _databaseContext = context;
     }
 
+    public async Task<long> CreateRealm(RealmEntity entity)
+    {
+        using var connection = _databaseContext.GetConnection("Primary");
+        var realmId = await connection.QueryAsync<long>(
+            """
+            INSERT INTO public.realms (realm_name, auth0_org_id, is_public, schema_name)
+            VALUES (@name, @auth0OrgId, @isPublic, @schemaName) RETURNING id
+            """, new
+            {
+                name = entity.Name,
+                auth0OrgId = entity.Auth0OrgId,
+                isPublic = entity.IsPublic,
+                schemaName = entity.schemaName
+            });
+        return realmId.Single();
+    }
+
     public async Task<RealmEntity?> GetRealmOrNull(long id)
     {
         using var connection = _databaseContext.GetConnection("Primary");
@@ -23,7 +40,8 @@ public class RealmRepository
             SELECT id as Id,
                    realm_name as Name,
                    auth0_org_id as Auth0OrgId,
-                   is_public as IsPublic
+                   is_public as IsPublic,
+                   schema_name as SchemaName
             from public.realms
             WHERE id=@realmId
             """, new
@@ -42,7 +60,8 @@ public class RealmRepository
             SELECT id as Id,
                 realm_name as Name,
                 auth0_org_id as Auth0OrgId,
-                is_public as IsPublic
+                is_public as IsPublic,
+                schema_name as SchemaName
             from public.realms
             WHERE auth0_org_id=@orgId
             """,
@@ -71,15 +90,26 @@ public class RealmRepository
         using var connection = _databaseContext.GetConnection("Primary");
         var realms = await connection.QueryAsync<RealmEntity>(
             """
+            (
             SELECT realms.id as Id,
                    realms.realm_name as Name,
                    realms.auth0_org_id as Auth0OrgId,
-                   realms.is_public as IsPublic
-                   from realm_membership
-                inner join realms
-                    on realm_membership.realm_id = realms.id
-                     OR realms.is_public = true
-            WHERE realm_membership.user_id = CAST(@userId as BIGINT);
+                   realms.is_public as IsPublic,
+                   realms.schema_name as SchemaName
+            from realm_membership
+                     inner join realms
+                                on realm_membership.realm_id = realms.id
+            WHERE realm_membership.user_id = CAST(@userId as BIGINT)
+            )
+            UNION
+            (
+            SELECT realms.id           as Id,
+                    realms.realm_name   as Name,
+                    realms.auth0_org_id as Auth0OrgId,
+                    realms.is_public    as IsPublic,
+                    realms.schema_name  as SchemaName
+             from realms
+             WHERE realms.is_public = true);
             """,
             new
             {

@@ -6,8 +6,6 @@ using LonelyVale.Api.Realms;
 using LonelyVale.Api.Users;
 using LonelyVale.Database;
 using LonelyVale.Tenancy;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 
@@ -19,7 +17,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.ConfigureLogging();
-
 
         // Add services to the container.
         builder.Services.AddHttpContextAccessor();
