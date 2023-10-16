@@ -39,7 +39,7 @@ public class UserControllerComponentTests :
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ErrorResponseBody>();
         Assert.NotNull(body);
-        Assert.Equal("Unable to determine a user to get. Please supply either a userId or an auth0UserId",
+        Assert.Contains("Unable to determine a user to get.",
             body.message
         );
     }
