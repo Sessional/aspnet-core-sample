@@ -1,10 +1,11 @@
+using LonelyVale.Api.Tests.Fixtures;
 using LonelyVale.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
-namespace LonelyVale.Api.Tests;
+namespace LonelyVale.Api.Tests.Utilities;
 
 public static class TestExtensions
 {

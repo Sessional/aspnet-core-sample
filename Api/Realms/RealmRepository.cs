@@ -27,7 +27,7 @@ public class RealmRepository
                 name = entity.Name,
                 auth0OrgId = entity.Auth0OrgId,
                 isPublic = entity.IsPublic,
-                schemaName = entity.schemaName
+                schemaName = entity.SchemaName
             });
         return realmId.Single();
     }

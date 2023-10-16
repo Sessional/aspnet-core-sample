@@ -3,7 +3,7 @@ using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using Testcontainers.PostgreSql;
 
-namespace LonelyVale.Api.Tests;
+namespace LonelyVale.Api.Tests.Fixtures;
 
 public class DatabaseFixture : IDisposable
 {
