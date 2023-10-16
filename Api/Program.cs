@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.RateLimiting;
 using LonelyVale.Api.Auth0;
 using LonelyVale.Api.Exceptions;
@@ -9,7 +8,6 @@ using LonelyVale.Api.Users;
 using LonelyVale.Database;
 using LonelyVale.Tenancy;
 using Microsoft.AspNetCore.Http.Json;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 
 namespace LonelyVale.Api;

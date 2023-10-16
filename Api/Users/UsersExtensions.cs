@@ -6,6 +6,7 @@ public static class UsersExtensions
     {
         services
             .AddSingleton<UserRepository>()
+            .AddSingleton<UserService>()
             .AddSingleton<UserResolver>();
         return services;
     }

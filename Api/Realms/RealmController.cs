@@ -9,14 +9,17 @@ namespace LonelyVale.Api.Realms;
 public class RealmController : ControllerBase
 {
     private readonly RealmRepository _repository;
+    private readonly UserService _userService;
     private readonly UserResolver _userResolver;
 
     public RealmController(
         RealmRepository repository,
+        UserService userService,
         UserResolver userResolver
     )
     {
         _repository = repository;
+        _userService = userService;
         _userResolver = userResolver;
     }
 
@@ -36,7 +39,8 @@ public class RealmController : ControllerBase
     [HttpGet("realms", Name = "ListRealms")]
     public async Task<ListRealmsResponse> Get([FromQuery] ListRealmsRequest request)
     {
-        var user = await _userResolver.ResolveUserForRequest(request.UserId, request.Auth0UserId);
+        var user = await _userService.GetUser(UserIdentity.FromFirstValue(request.UserId,
+            request.Auth0UserId, _userResolver.CurrentCallerSub));
         var realms = await _repository.GetRealmsForUser(user);
         return new ListRealmsResponse(
             realms.Select(realm => new DescribeRealmResponse(
