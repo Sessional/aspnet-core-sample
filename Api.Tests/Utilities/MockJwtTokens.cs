@@ -1,10 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 
-namespace LonelyVale.Api.Tests;
+namespace LonelyVale.Api.Tests.Utilities;
 
 // https://stebet.net/mocking-jwt-tokens-in-asp-net-core-integration-tests/
 public static class MockJwtTokens

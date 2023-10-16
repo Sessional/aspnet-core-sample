@@ -1,22 +1,13 @@
 using System.Net;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Security.Claims;
-using Dapper;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
-using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Networks;
+using LonelyVale.Api.Tests.Fixtures;
+using LonelyVale.Api.Tests.Utilities;
 using LonelyVale.Api.Users;
-using LonelyVale.Database;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Testcontainers.PostgreSql;
 using Xunit;
 
-namespace LonelyVale.Api.Tests;
+namespace LonelyVale.Api.Tests.Users;
 
 public class UserControllerComponentTests :
     IClassFixture<WebApplicationFactory<Program>>,
@@ -52,7 +43,7 @@ public class UserControllerComponentTests :
             body.message
         );
     }
-    
+
     [Fact]
     public async Task GetUsersWithoutTokenFails()
     {
@@ -67,7 +58,7 @@ public class UserControllerComponentTests :
     public async Task GetUsersWithUserIdSucceeds()
     {
         var client = _factory.CreateClient();
-        var auth0UserId = "auth0|this-is-an-absurd-name";
+        var auth0UserId = Arbitrary.ArbitraryAuth0Id();
 
         var repository = _factory.Services.GetService<UserRepository>();
         Assert.NotNull(repository);
