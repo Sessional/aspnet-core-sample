@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.RateLimiting;
 using LonelyVale.Api.Auth0;
 using LonelyVale.Api.Exceptions;
 using LonelyVale.Api.Logging;
@@ -7,6 +9,7 @@ using LonelyVale.Api.Users;
 using LonelyVale.Database;
 using LonelyVale.Tenancy;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 
 namespace LonelyVale.Api;
@@ -49,6 +52,20 @@ public class Program
             options.AddRealmAuthorization();
         });
 
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    httpContext.User.FindFirstValue("sub") ?? httpContext.Request.Headers.Host.ToString(),
+                    partition => new FixedWindowRateLimiterOptions
+                    {
+                        AutoReplenishment = true,
+                        PermitLimit = 10,
+                        QueueLimit = 0,
+                        Window = TimeSpan.FromSeconds(10)
+                    }));
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -60,6 +77,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseRateLimiter();
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -70,7 +88,8 @@ public class Program
 
         app.UseHeaderBasedTenancy();
 
-        app.MapControllers().RequireAuthorization();
+        app.MapControllers()
+            .RequireAuthorization();
 
         app.Run();
     }
